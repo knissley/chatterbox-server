@@ -11,6 +11,7 @@ var Parse = {
       contentType: 'application/json',
       success: successCB,
       error: errorCB || function (error) {
+        console.log(message);
         console.error('chatterbox: Failed to create message', error);
       }
     });
