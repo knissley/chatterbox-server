@@ -1,4 +1,5 @@
 var request = require('request');
+// var request = require('../request-handler.js');
 var expect = require('chai').expect;
 
 describe('server', function() {
@@ -12,6 +13,7 @@ describe('server', function() {
 
   it('should send back parsable stringified JSON', function(done) {
     request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+      // console.log('body within the test:', body);
       expect(JSON.parse.bind(this, body)).to.not.throw();
       done();
     });
