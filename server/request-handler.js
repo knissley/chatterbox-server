@@ -170,14 +170,24 @@ var defaultCorsHeaders = {
 */
 
 
-var requestHandler = function(request, response) {
+var requestHandler = function (request, response) {
   console.log(request.url);
   // Handle Request first
   // Take out headers, method, and URL from request object
-  const { headers, method, url} = request;
+  const { method, url } = request;
+
+  let headers = defaultCorsHeaders;
+  headers['Content-Type'] = 'application/json';
+
+
+  var ip = '127.0.0.1';
+  var port = 3000;
+  var combined = 'http://' + ip + ':' + port;
+
+
 
   // Check URL endpoint & request type
-  if (url === '/classes/messages') {
+  if (url.includes(combined + '/classes/messages')) {
     console.log('request handler');
     // Check for error event
     request.on('error', (err) => {
@@ -185,28 +195,35 @@ var requestHandler = function(request, response) {
     });
 
     if (method === 'POST') {
-    // Listen for data event and chain to end event
-    //   Access chunk, and transform accordingly
+      // Listen for data event and chain to end event
+      //   Access chunk, and transform accordingly
       let transformedChunk;
       request.on('data', (chunk) => {
-        transformedChunk = JSON.stringify(JSON.parse(chunk));
+        //just parse, stringify later
+        transformedChunk = JSON.parse(chunk);
       }).on('end', () => {
         allData.push(transformedChunk);
       });
 
-      let headers = defaultCorsHeaders;
-      headers['Content-Type'] = 'application/json';
+      // let headers = defaultCorsHeaders;
+      // headers['Content-Type'] = 'application/json';
       // response.statusCode = 201;
-      response.setHeader(201, headers);
+      response.writeHead(201, headers);
 
       //from raymond - JSON.stringify data here
-      response.end(JSON.stringify(transformedChunk));
+      // response.end(JSON.stringify(transformedChunk));
+      response.end();
 
     } else if (method === 'GET') {
-      console.log('get');
-      // response.write(allData);
+      response.writeHead(200, headers);
+      response.end(JSON.stringify(allData));
+    } else if (method === 'OPTIONS') {
+      response.writeHead(200, headers);
+      response.end();
     }
   }
+
+  response.writeHead(404, headers);
 
   // Handle Response next
 
@@ -216,4 +233,5 @@ var requestHandler = function(request, response) {
 
 // END POINT: `http://127.0.0.1:3000/classes/messages`
 
-exports.handleRequest = requestHandler;
+// exports.handleRequest = requestHandler;
+exports.requestHandler = requestHandler;
